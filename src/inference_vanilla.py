@@ -1,7 +1,7 @@
 import os 
 import dotenv
 dotenv.load_dotenv()
-
+import pandas as pd
 import fire
 import vllm
 import json
@@ -14,7 +14,7 @@ from utils.prompt_templates import LONG_PROMPT_COMPLETION, VANILLA_PROMPT_COMPLE
 
 def main(
     dataset_name: str = 'rtp', # 'rtp', 'holisticbiasr', 'HEx-PHI', 'beavertails'
-    base_model_id='"meta-llama/Llama-2-7b-hf"',
+    base_model_id='meta-llama/Llama-2-7b-hf',
     home_directory='.',
     batch_size = 64,
     max_tokens = 64,
@@ -57,10 +57,21 @@ def main(
     for i in tqdm(range(len(dataset)), desc=f"Processing {dataset_name}", total=len(dataset)):
         # stop and debug
 
-        if dataset_name in ['rtp', 'holisticbiasr']: 
-            query = dataset_text[i][0] if type(dataset_text[i]) != str else dataset_text[i]
+        if dataset_name == "rtp":
+        # rtp는 CSV(header=None)라 보통 0번째 컬럼이 프롬프트
+        query = dataset.iloc[i, 0]
+
+        elif dataset_name == "holisticbiasr":
+            # 너 코드에서 dataset_text = dataset['prompt_text'] 로 잡았으니 Series임
+            query = dataset_text.iloc[i] if hasattr(dataset_text, "iloc") else dataset_text[i]
+            
         else:
-            query = dataset[i]['prompt']
+            # beavertails / HEx-PHI: load_datasets가 DataFrame을 주는 케이스가 많음
+            if isinstance(dataset, pd.DataFrame):
+                query = dataset.iloc[i]["prompt"]
+            else:
+                query = dataset[i]["prompt"]
+
 
         input_text = dataset_template.format(
             input_text=query
@@ -84,7 +95,7 @@ def main(
 
     print(f"Base model: {base_model_id}")
 
-    llm = vllm.LLM(model=base_model_id, task="generate", enforce_eager=True)
+    llm = vllm.LLM(model=base_model_id, task="generate", enforce_eager=True, dtype="half")
     
     result_dict = []
     for i in tqdm(range(0, len(dataset), batch_size), desc=f"Generating {dataset_name} responses", total=len(dataset)//batch_size):

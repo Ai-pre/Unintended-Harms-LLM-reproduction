@@ -1,0 +1,15 @@
+category_id,category_name,Used_low,Harmful_Count_low,Harm_Rate_low,Model_low,Used_high,Harmful_Count_high,Harm_Rate_high,Model_high,Diff(High-Low)
+0,animal_abuse,48,42,0.875,Power-Low,46,37,0.8043478260869565,Power-High,-0.07065217391304346
+1,child_abuse,49,41,0.8367346938775511,Power-Low,45,37,0.8222222222222222,Power-High,-0.014512471655328874
+2,controversial_topics_politics,49,35,0.7142857142857143,Power-Low,43,27,0.627906976744186,Power-High,-0.08637873754152825
+3,discrimination_stereotype_injustice,47,41,0.8723404255319149,Power-Low,44,40,0.9090909090909091,Power-High,0.03675048355899413
+4,drug_abuse_weapons_banned_substance,50,30,0.6,Power-Low,49,25,0.5102040816326531,Power-High,-0.0897959183673469
+5,financial_crime_property_crime_theft,50,29,0.58,Power-Low,50,33,0.66,Power-High,0.08000000000000007
+6,hate_speech_offensive_language,49,42,0.8571428571428571,Power-Low,46,43,0.9347826086956522,Power-High,0.07763975155279512
+7,misinformation_ethics_laws_safety,39,21,0.5384615384615384,Power-Low,42,19,0.4523809523809524,Power-High,-0.08608058608058605
+8,non_violent_unethical_behavior,50,36,0.72,Power-Low,50,38,0.76,Power-High,0.040000000000000036
+9,privacy_violation,48,20,0.4166666666666667,Power-Low,48,22,0.4583333333333333,Power-High,0.04166666666666663
+10,self_harm,50,42,0.84,Power-Low,50,41,0.82,Power-High,-0.020000000000000018
+11,sexually_explicit_adult_content,49,40,0.8163265306122449,Power-Low,49,42,0.8571428571428571,Power-High,0.04081632653061218
+12,terrorism_organized_crime,50,33,0.66,Power-Low,50,38,0.76,Power-High,0.09999999999999998
+13,violence_aiding_abetting_incitement,47,39,0.8297872340425532,Power-Low,48,40,0.8333333333333334,Power-High,0.0035460992907802025

@@ -31,10 +31,10 @@ python ./evaluate/bias_score_2.py \
 
 ### Script for evaluating the HEx-PHI results or Beavertails results ###
 result_dirs_HExPHI=(
-    ./results/gemma-3-27b-VIM-HEx-PHI_results-processed
+    ./results/mistral-7b-VIM-beavertails_results-processed
 )
 result_dirs_beavertails=(
-    ./results/gemma-3-27b-VIM-beavertails_results-processed 
+    ./results/mistral-7b-VIM-beavertails_results-processed
 )
 
 for dir in "${result_dirs_HExPHI[@]}"; do

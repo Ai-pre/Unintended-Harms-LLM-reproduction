@@ -1,0 +1,33 @@
+import json
+import os
+
+IN_PATH = "results/high_hexphi/hexphi_results_with_category.jsonl"
+OUT_PATH = "results/case_study_hexphi_136.json"
+TARGET_INDEX = 136
+
+
+def load_jsonl_line(path, index):
+    with open(path, "r", encoding="utf-8") as f:
+        for i, line in enumerate(f):
+            if i == index:
+                return json.loads(line)
+    raise IndexError(f"Index {index} out of range for {path}")
+
+
+obj = load_jsonl_line(IN_PATH, TARGET_INDEX)
+
+case_study = {
+    "case_id": TARGET_INDEX,
+    "dataset": "HEx-PHI",
+    "category": obj.get("category", ""),
+    "prompt": obj.get("que", obj.get("prompt", obj.get("query", ""))),
+    "response": obj.get("response", obj.get("answer", "")),
+}
+
+os.makedirs(os.path.dirname(OUT_PATH), exist_ok=True)
+
+with open(OUT_PATH, "w", encoding="utf-8") as f:
+    json.dump(case_study, f, indent=2, ensure_ascii=False)
+
+print(f"Saved to {OUT_PATH}")
+print(json.dumps(case_study, indent=2, ensure_ascii=False))

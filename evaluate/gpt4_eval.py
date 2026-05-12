@@ -23,91 +23,76 @@ def hex_main(
     input_file,
     output_folder,
     openai_client,
-    openai_modelname,  
+    openai_modelname,
     check=-1,
     **kwargs
 ):
     print(f"Processing {input_file.split('/')[-1]}...")
-    data = pd.read_json(input_file, lines=True)
-    
-    outputs_to_judge = [data['response'][i] for i in range(len(data))]
-    benchmark = [data['prompt'][i] for i in range(len(data))]
-    categories = [data['category'][i] for i in range(len(data))]
-    QApairs = list(zip(benchmark, outputs_to_judge))
-    
-    if check != -1:
-        outputs_to_judge = outputs_to_judge[:check]
-        benchmark = benchmark[:check]
-        categories = categories[:check]
-        QApairs = QApairs[:check]
-    
-    duo_results = duo_judge(QApairs, outputs_to_judge, openai_client, openai_modelname)
-    print(f"Finished processing {input_file.split('/')[-1]}.", len(duo_results[0]))
-    
-    # Save results
-    qa_records = []
-    cnt = 0
-    for (que, ans) in QApairs:
-        record = {
-            'category': categories[cnt],
-            'que': que,
-            'ans': ans,
-            'duo_score': duo_results[0][cnt],
-            'duo_reason': duo_results[1][cnt],
-        }
-        qa_records.append(record)
-        cnt += 1
-        
-    output_filename = input_file.split('/')[-1].split('.')[0]
-    output_file = os.path.join(output_folder, output_filename + '.json')
-    with open(output_file, 'w') as f:
-        json.dump(qa_records, f, indent=4)
 
-def beaver_main(
-    input_file,
-    output_folder,
-    openai_client,
-    openai_modelname,  
-    check=-1,
-    **kwargs
-):
+    # JSONL load
+    data = pd.read_json(input_file, lines=True)
+
+    # ✅ 인덱스 문제 방지
+    data = data.reset_index(drop=True)
+
+    if check != -1:
+        data = data.head(check)
+
+    # 리스트 변환 (안전)
+    outputs_to_judge = data["response"].tolist()
+    benchmark = data["prompt"].tolist()
+    categories = data["category"].tolist()
+
+    QApairs = list(zip(benchmark, outputs_to_judge))
+
+    duo_results = duo_judge(QApairs, outputs_to_judge, openai_client, openai_modelname)
+
+    print(f"Finished processing {input_file.split('/')[-1]}:", len(duo_results[0]))
+
+    qa_records = []
+    for idx, (que, ans) in enumerate(QApairs):
+        qa_records.append({
+            "category": categories[idx],
+            "que": que,
+            "ans": ans,
+            "duo_score": duo_results[0][idx],
+            "duo_reason": duo_results[1][idx],
+        })
+
+    output_filename = input_file.split('/')[-1].split('.')[0]
+    output_file = os.path.join(output_folder, output_filename + ".json")
+
+    with open(output_file, "w") as f:
+        json.dump(qa_records, f, indent=4, ensure_ascii=False)
+
+
+def beaver_main(input_file, output_folder, openai_client, openai_modelname, check=-1, **kwargs):
     print(f"Processing {input_file.split('/')[-1]}...")
     data = pd.read_json(input_file, lines=True)
-    outputs_to_judge = data['response'].tolist()
-    benchmark = [data['prompt'][i] for i in range(len(data))]
-    category_id = [data['category_id'][i] for i in range(len(data))]
-    QApairs = list(zip(benchmark, outputs_to_judge))
-    
+
     if check != -1:
-        outputs_to_judge = outputs_to_judge[:check]
-        benchmark = benchmark[:check]
-        category_id = category_id[:check]
-        QApairs = QApairs[:check]
-    
-    beaver_results,_ = beaver_evaluate(QApairs, outputs_to_judge, openai_client, openai_modelname) # Call GPT4 API
-    print(f"Finished processing {input_file.split('/')[-1]}.", len(beaver_results))
-    
-    # Save results
+        data = data.head(check)
+
+    QApairs = list(zip(data["prompt"].tolist(), data["response"].tolist()))
+    outputs_to_judge = data["response"].tolist()
+
+    beaver_results, _ = beaver_evaluate(QApairs, outputs_to_judge, openai_client, openai_modelname)
+
     qa_records = []
-    cnt = 0
-    for (que, ans) in QApairs:
-        record = {
-            'index': int(cnt),
-            'prompt': que,
-            'response': ans,
-            'category_id': int(category_id[cnt]),
-            'flagged':{
-                'gpt4': beaver_results[cnt],
-                },
-        }
-        qa_records.append(record)
-        cnt += 1
-        
-    # Dump to output file
+    for idx, (que, ans) in enumerate(QApairs):
+        qa_records.append({
+            "index": int(idx),
+            "prompt": que,
+            "response": ans,
+            "category_id": int(data["category_id"].iloc[idx]),
+            "flagged": {"gpt4": beaver_results[idx]},
+        })
+
     output_filename = input_file.split('/')[-1].split('.')[0]
     output_file = f"{output_folder}/{output_filename}.json"
     with open(output_file, 'w') as f:
-        json.dump(qa_records, f, indent=4)
+        json.dump(qa_records, f, indent=2, ensure_ascii=False)
+
 
 def result_organize(target_directory):
     result_file_list = [f for f in os.listdir(target_directory) if f.endswith('.json')]
@@ -139,7 +124,7 @@ def result_organize(target_directory):
 
 def main(
     dataset_name = 'beavertails', # 'HEx-PHI' or 'beavertails'
-    openai_modelname = "gpt-4o",
+    openai_modelname = "gpt-4o-mini",
     target_result_path = 'resultpath',
     num_threads=60,
     check=-1,

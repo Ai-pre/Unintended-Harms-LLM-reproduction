@@ -6,7 +6,7 @@ echo "LENGTH: $length"
 start="started"
 finish="finished"
 
-ckpt_home_path=./ckpt/argument_survey/llama-2-7b/min_TH_3
+ckpt_home_path=./ckpt/argument_survey/mistral/min_TH_3
 
 dataset_names=('rtp' 'holisticbiasr' 'HEx-PHI' 'beavertails')
 

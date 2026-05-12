@@ -89,24 +89,21 @@ class DS_survey(Dataset):
                 "attention_mask"
             ][i]
             self.labels["input_ids"][i] = [-100] * (max_length - len(sample_input_ids)) + label_input_ids
-            self.model_inputs["input_ids"][i] = self.model_inputs["input_ids"][i][:max_length]
-            self.model_inputs["attention_mask"][i] = self.model_inputs["attention_mask"][i][:max_length]
-            self.labels["input_ids"][i] = self.labels["input_ids"][i][:max_length]
+            self.model_inputs["input_ids"][i] = self.model_inputs["input_ids"][i][-max_length:]
+            self.model_inputs["attention_mask"][i] = self.model_inputs["attention_mask"][i][-max_length:]
+            self.labels["input_ids"][i] = self.labels["input_ids"][i][-max_length:]
         self.model_inputs["labels"] = self.labels["input_ids"]
     
     def __len__(self):
         return len(self.model_inputs["labels"])
-    
+
     def __getitem__(self, idx):
-        return (self.model_inputs['input_ids'][idx], self.model_inputs['attention_mask'][idx], self.model_inputs['labels'][idx])
-    
-    def __getitem__(self, idx):
-        return {
-            'input_ids': self.model_inputs['input_ids'][idx],
-            'attention_mask': self.model_inputs['attention_mask'][idx],
-            'labels': self.labels["input_ids"][idx],
-            'text': self.model_inputs['input_ids'][idx]
-        }
+        return (
+            self.model_inputs["input_ids"][idx],
+            self.model_inputs["attention_mask"][idx],
+            self.model_inputs["labels"][idx],
+        )
+
     
 class DS_survey_Chat(Dataset):
     def __init__(self, tokenizer, df, target_score):
@@ -179,13 +176,22 @@ class DS_survey_Chat(Dataset):
                 "attention_mask"
             ][i]
             self.labels["input_ids"][i] = [-100] * (max_length - len(sample_input_ids)) + label_input_ids
-            self.model_inputs["input_ids"][i] = self.model_inputs["input_ids"][i][:max_length]
-            self.model_inputs["attention_mask"][i] = self.model_inputs["attention_mask"][i][:max_length]
-            self.labels["input_ids"][i] = self.labels["input_ids"][i][:max_length]
+            self.model_inputs["input_ids"][i] = self.model_inputs["input_ids"][i][-max_length:]
+            self.model_inputs["attention_mask"][i] = self.model_inputs["attention_mask"][i][-max_length:]
+            self.labels["input_ids"][i] = self.labels["input_ids"][i][-max_length:]
+
         self.model_inputs["labels"] = self.labels["input_ids"]
     
     def __len__(self):
         return len(self.model_inputs["labels"])
+
+    def __getitem__(self, idx):
+        return (
+            self.model_inputs["input_ids"][idx],
+            self.model_inputs["attention_mask"][idx],
+            self.model_inputs["labels"][idx],
+        )
+
 
 class DS_survey_trl(Dataset):
     def __init__(self, tokenizer, df, target_score):
@@ -231,7 +237,7 @@ class DS_survey_trl(Dataset):
         print(self.inputs[0])
         print(self.targets[0])
         batch_size = len(self.inputs)
-        max_length = 128
+        max_length = 256
         
         self.model_inputs = tokenizer(self.inputs)
         self.labels = tokenizer(self.targets)
@@ -259,14 +265,13 @@ class DS_survey_trl(Dataset):
     
     def __len__(self):
         return len(self.model_inputs["labels"])
-    
+
     def __getitem__(self, idx):
-        return {
-            'input_ids': self.model_inputs['input_ids'][idx],
-            'attention_mask': self.model_inputs['attention_mask'][idx],
-            'labels': self.labels["input_ids"][idx],
-            'text': self.inputs[idx]+self.targets[idx],
-        }
+        return (
+            self.model_inputs["input_ids"][idx],
+            self.model_inputs["attention_mask"][idx],
+            self.model_inputs["labels"][idx],
+        )
         # return (
         #     self.model_inputs['input_ids'][idx], 
         #     self.model_inputs['attention_mask'][idx], 

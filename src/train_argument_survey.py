@@ -34,7 +34,7 @@ def main(
     GPU_NUM: str,
     model_name: str = 'llama2',
     model_name_or_path: str = 'meta-llama/Llama-2-7b-hf',
-    learning_rate: float = 2e-5,
+    learning_rate: float = 1e-5,
     num_epochs: int = 5,
     batch_size: int = 1,
     seed: int = 42,

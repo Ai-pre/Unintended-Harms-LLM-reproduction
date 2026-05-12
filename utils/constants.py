@@ -6,7 +6,7 @@ import yaml
 ##############################
 # API keys
 ##############################
-OPENAI_API_KEY = ''
+OPENAI_API_KEY = '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'
 
 ##############################
 # Model Configurations
